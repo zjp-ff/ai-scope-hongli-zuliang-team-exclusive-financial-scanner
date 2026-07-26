@@ -1,0 +1,74 @@
+{
+  "600519": {
+    "name": "贵州茅台", "industry": "白酒",
+    "eps": 21.76, "bps": 216.32,
+    "revenue": 53909250000, "netProfit": 27242512500,
+    "totalAssets": 319918840000, "netAssets": 270894040000,
+    "roe": 10.06, "petTm": 18.02,
+    "profitMargin": 69.6, "debtRatio": 15.3,
+    "lastUpdate": "20260724"
+  },
+  "300750": {
+    "name": "宁德时代", "industry": "电力设备",
+    "eps": 9.51, "bps": 81.99,
+    "revenue": 276916580000, "netProfit": 43284000000,
+    "totalAssets": 1138880800000, "netAssets": 379353720000,
+    "roe": 11.41, "petTm": 24.54,
+    "profitMargin": 20.1, "debtRatio": 66.7,
+    "lastUpdate": "20260724"
+  },
+  "002594": {
+    "name": "比亚迪", "industry": "汽车",
+    "eps": 0.45, "bps": 25.44,
+    "revenue": 150225310000, "netProfit": 4084550940,
+    "totalAssets": 902077000000, "netAssets": 249916720000,
+    "roe": 1.63, "petTm": 21.85,
+    "profitMargin": 3.1, "debtRatio": 72.3,
+    "lastUpdate": "20260724"
+  },
+  "601318": {
+    "name": "中国平安", "industry": "保险",
+    "eps": 1.43, "bps": 56.24,
+    "revenue": 218405000000, "netProfit": 25022000000,
+    "totalAssets": 14169946900000, "netAssets": 1018310000000,
+    "roe": 2.46, "petTm": 6.97,
+    "profitMargin": 16.1, "debtRatio": 92.8,
+    "lastUpdate": "20260724"
+  },
+  "300059": {
+    "name": "东方财富", "industry": "金融科技",
+    "eps": 0.24, "bps": 6.05,
+    "revenue": 10627635200, "netProfit": 3737780000,
+    "totalAssets": 439896960000, "netAssets": 9561141000,
+    "roe": 3.91, "petTm": 25.40,
+    "profitMargin": 35.2, "debtRatio": 78.3,
+    "lastUpdate": "20260724"
+  },
+  "000858": {
+    "name": "五粮液", "industry": "白酒",
+    "eps": 2.08, "bps": 32.98,
+    "revenue": 22838025000, "netProfit": 8062765000,
+    "totalAssets": 198638180000, "netAssets": 127996670000,
+    "roe": 6.3, "petTm": 10.04,
+    "profitMargin": 46.7, "debtRatio": 35.5,
+    "lastUpdate": "20260724"
+  },
+  "000333": {
+    "name": "美的集团", "industry": "家电",
+    "eps": 1.69, "bps": 30.55,
+    "revenue": 131098600000, "netProfit": 12674556000,
+    "totalAssets": 613881520000, "netAssets": 232307700000,
+    "roe": 5.46, "petTm": 12.69,
+    "profitMargin": 11.5, "debtRatio": 62.2,
+    "lastUpdate": "20260724"
+  },
+  "000002": {
+    "name": "万科A", "industry": "房地产",
+    "eps": -0.50, "bps": 9.27,
+    "revenue": 28927890000, "netProfit": -5952156250,
+    "totalAssets": 997406720000, "netAssets": 110535200000,
+    "roe": -5.39, "petTm": -1.54,
+    "profitMargin": -15.3, "debtRatio": 88.9,
+    "lastUpdate": "20260724"
+  }
+}

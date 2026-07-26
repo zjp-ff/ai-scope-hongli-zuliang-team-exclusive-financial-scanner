@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AI侦查镜</title>
+<style>
+:root{--a50:#FAEEDA;--a75:#FAC775;--a6:#854F0B;--a9:#412402;--p50:#EEEDFE;--p100:#CECBF6;--p6:#534AB7;--p8:#3C3489;--c50:#FAECE7;--c6:#D85A30;--r4:#E24B4A;--r50:#FCEBEB;--g4:#639922;--g50:#EAF3DE;--bg:#FAF9F6;--card:#FFFFFF;--bd:#E8E6E0;--t1:#2C2C2A;--t2:#6B6963;--t3:#9E9B94;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--t1);font-size:15px;max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:40px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.banner{background:linear-gradient(135deg,var(--a50),var(--p50));padding:22px 20px 18px}
+.banner h1{font-size:24px;font-weight:700;display:flex;align-items:center;gap:10px}.badge{font-size:11px;color:var(--g4);background:var(--g50);padding:3px 10px;border-radius:10px}
+.banner p{font-size:13px;color:var(--a6);margin:6px 0 0}
+.qual-bar{margin:12px;padding:12px 14px;background:var(--p50);border-radius:12px;display:flex;justify-content:space-between}
+.qual-bar.locked .qual-btn{background:var(--p6);color:#fff;border:none}
+.qual-btn{font-size:14px;color:var(--p6);border:0.5px solid var(--p4);padding:7px 18px;border-radius:16px;cursor:pointer}
+.search-box{padding:6px 16px 10px;position:relative}
+.search-input{display:flex;gap:8px;background:var(--card);border:0.5px solid var(--bd);border-radius:12px;padding:10px 14px}
+.search-input input{flex:1;border:none;background:transparent;font-size:15px;outline:none}
+.search-btn{background:var(--p6);color:#fff;border:none;padding:8px 22px;border-radius:8px;cursor:pointer}
+#suggestions{display:none;position:absolute;background:var(--card);border:0.5px solid var(--bd);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:100;left:16px;right:16px}
+.sug-item{display:flex;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:0.5px solid var(--bd)}
+.sug-item:last-child{border-bottom:none}.sug-item:active{background:var(--p50)}
+.hot-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.hot-tags span{font-size:12px;color:var(--t2);background:var(--card);border:0.5px solid var(--bd);padding:5px 12px;border-radius:14px;cursor:pointer}
+.profile-card{background:var(--card);border:0.5px solid var(--bd);border-radius:14px;padding:16px;margin:6px 16px 0;animation:fadeIn .4s ease}
+.p-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.p-name{font-size:16px;font-weight:600}.p-code{font-size:12px;color:var(--t3)}
+.p-price{text-align:right}.p-price .val{font-size:18px;font-weight:600}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.p-item{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}
+.p-item .label{color:var(--t2)}.p-item .value{font-weight:500}
+.score-box,.ai-read{margin:0 16px}.score-box{background:var(--card);border:0.5px solid var(--bd);border-radius:14px;padding:18px;margin-top:12px;text-align:center;animation:fadeIn .4s ease}
+.score-num{font-size:38px;font-weight:700;line-height:1;margin:6px 0}.score-grade{display:inline-block;font-size:12px;padding:3px 14px;border-radius:12px}
+.ai-read{background:linear-gradient(135deg,var(--p50),var(--a50));border-radius:14px;padding:14px;margin-top:10px;animation:fadeIn .4s ease}
+.ai-read .text{font-size:13px;line-height:1.7}
+.dim-expand{padding:0 16px}.d-card{background:var(--card);border:0.5px solid var(--bd);border-radius:12px;padding:14px;margin-top:8px;animation:fadeIn .4s ease}
+.d-head{display:flex;justify-content:space-between;margin-bottom:8px}.d-name,.d-score{font-size:13px;font-weight:600}
+.d-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.d-bar i{display:block;height:100%;border-radius:3px;transition:width .6s ease}
+.d-finding{font-size:12px;color:var(--t2);padding:8px 10px;background:var(--bg);border-radius:8px;margin-top:6px;line-height:1.7}
+.cursor{display:inline-block;width:2px;height:14px;background:var(--p6);animation:blink 1s infinite;vertical-align:middle}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}
+.overlay.show{display:flex}.modal{background:var(--card);border-radius:18px;padding:24px;max-width:340px;width:100%;text-align:center;animation:fadeIn .3s}
+.modal .btn-row{display:flex;gap:10px;margin-top:16px}.modal .btn-pri{background:var(--p6);color:#fff;padding:11px;border-radius:10px;border:none;flex:1;cursor:pointer}.modal .btn-sec{background:var(--bg);color:var(--t2);border:0.5px solid var(--bd);padding:11px;border-radius:10px;flex:1;cursor:pointer}
+.modal h3{font-size:17px;font-weight:600}.modal p{font-size:13px;color:var(--t2);margin:10px 0}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:300;display:none}.toast.show{display:block}
+.act-card{margin:16px 12px;padding:14px;background:var(--c50);border-radius:14px;text-align:center}
+.act-card h4{font-size:14px;font-weight:600;color:var(--c6)}
+</style>
+</head>
+<body>
+<div class="banner" style="text-align:center">
+  <div style="margin-bottom:6px;text-align:left">
+    <span class="badge" style="background:var(--a75);color:var(--a9);font-size:12px;padding:3px 12px;border-radius:14px;font-weight:500">&#9733; 祖良团队专属</span>
+  </div>
+  <h1 style="justify-content:center"><svg width="32" height="32" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="#534AB7" stroke-width="2"/><circle cx="14" cy="14" r="6" stroke="#534AB7" stroke-width="1.5"/><line x1="14" y1="0" x2="14" y2="5" stroke="#534AB7" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="23" x2="14" y2="28" stroke="#534AB7" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="14" x2="5" y2="14" stroke="#534AB7" stroke-width="2" stroke-linecap="round"/><line x1="23" y1="14" x2="28" y2="14" stroke="#534AB7" stroke-width="2" stroke-linecap="round"/><circle cx="14" cy="14" r="2" fill="#D85A30"/></svg>AI侦查镜</h1>
+  <p style="text-align:center">弘历周年庆限定 - A股智能诊断</p>
+  <p style="font-size:11px;color:var(--a6);margin-top:6px;text-align:center" id="updateTime">数据加载中...</p>
+</div>
+<div class="qual-bar locked" id="qualBar">
+  <div><p id="qualTitle" style="font-size:14px;font-weight:600;color:var(--p8)">限时权益未领取</p><span style="font-size:13px;color:var(--p6)">联系助教老师解锁全部权益</span></div>
+  <button class="qual-btn" onclick="openModal()">去领取</button>
+</div>
+<div class="search-box">
+  <div class="search-input">
+    <input id="stockInput" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')doDiag()">
+    <button class="search-btn" onclick="doDiag()">侦查</button>
+  </div>
+  <div id="suggestions"></div>
+  <div class="hot-tags" id="hotTags"></div>
+</div>
+<div id="result"></div>
+<div style="margin:16px 12px 8px;padding:12px 14px;background:var(--a50);border-radius:12px;border:0.5px solid var(--a75);line-height:1.7;text-align:center">
+  <span style="font-size:13px;color:var(--a6)">📞 如遇问题请第一时间联系祖良老师助教：</span><br>
+  <span style="font-size:15px;font-weight:600;color:var(--a9)">朱纪平、康增亮、张卫轩</span>
+</div>
+<div style="margin:8px 12px 8px;padding:10px 14px;background:var(--bg);border-radius:10px;text-align:center"><p style="font-size:10px;color:var(--t3);line-height:1.6">免责声明：本页面所有数据仅供参考，不构成任何投资建议或承诺，投资有风险，入市需谨慎。</p></div>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>领取限时权益</h3>
+    <p>联系助教老师即可解锁全部权益</p>
+    <img src="qrcode.jpg" width="140" height="140" style="border-radius:10px;margin:8px auto;display:block">
+    <p style="font-size:12px;color:var(--t3);margin-top:-2px">扫码联系助教老师</p>
+    <div class="btn-row">
+      <button class="btn-sec" onclick="closeModal()">稍后再说</button>
+      <button class="btn-pri" onclick="unlock()">我已联系立即解锁</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let catalog=[],quotes={},lite={},full={},HOT=['600519','300750','002594','601318','300059','000858','000333','600036','600276','002415','002230','000063','603019','600900','601857','601899','002352','601127','601012'];
+
+function init(){
+  Promise.all([
+    fetch('stocks_catalog.json').then(r=>r.json()).then(d=>{catalog=d;}),
+    fetch('quotes_cache.json').then(r=>r.json()).then(d=>{quotes=d;}),
+    fetch('lite_cache.json').then(r=>r.json()).then(d=>{lite=d;}),
+    fetch('data_cache.json').then(r=>r.json()).then(d=>{full=d;document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-24 收盘');})
+  ]).then(()=>{
+    document.getElementById('stockInput').placeholder='输入股票名称或代码';
+    setupAuto();
+    renderHots();
+  });
+}
+init();
+
+function setupAuto(){
+  const inp=document.getElementById('stockInput');let timer;
+  inp.addEventListener('input',function(){
+    clearTimeout(timer);timer=setTimeout(()=>{
+      const v=this.value.trim();if(v.length<1){sgst([]);return;}
+      const m=catalog.filter(s=>s.name.includes(v)||s.code.includes(v)).slice(0,8);
+      sgst(m);
+    },150);
+  });
+  inp.addEventListener('blur',()=>setTimeout(()=>sgst([]),200));
+}
+function sgst(list){
+  const el=document.getElementById('suggestions');
+  if(list.length) el.innerHTML=list.map(s=>{
+    const l=quotes[s.code];const z=l?l.z:0;
+    const col=z>0?'var(--r4)':z<0?'var(--g4)':'var(--t3)';
+    return '<div class="sug-item" onclick="pick(\''+s.code+'\')"><span class="sug-name">'+s.name+'</span><span class="sug-code" style="color:'+col+'">'+s.code+' '+(z>0?'▲':'▼')+''+(z?Math.abs(z).toFixed(1)+'%':'')+'</span></div>';
+  }).join('');
+  el.style.display=list.length?'block':'none';
+}
+function pick(c){const s=catalog.find(x=>x.code===c);document.getElementById('stockInput').value=s?s.name:c;sgst([]);show(c);}
+
+function doDiag(){
+  const v=document.getElementById('stockInput').value.trim();
+  if(!v){toast('请输入股票名称或代码');return;}
+  // resolve
+  let r=catalog.find(x=>x.code===v);if(!r)r=catalog.find(x=>x.name===v);
+  if(!r)r=catalog.filter(x=>x.name.includes(v)||x.code.includes(v))[0];
+  if(!r){toast('未找到该股票');return;}
+  document.getElementById('stockInput').value=r.name;sgst([]);show(r.code);
+}
+
+function show(c){
+  sgst([]);const el=document.getElementById('result');
+  const q=quotes[c];const li=lite[c];const ct=catalog.find(x=>x.code===c);
+  const fd=full&&full.stocks&&full.stocks[c]?full.stocks[c]:null;
+  if(!q){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">暂无数据</div>';return;}
+  const nm=ct?ct.name:'';const up=q.z>0;
+  // 核心标的用完整诊断评分，普通标的用精简评分
+  const s=fd?fd.totalScore:(li?li.s:Math.round(50+q.z*1.5));
+  const g=fd?fd.grade:(li?li.g:(s>=75?'强势':s>=60?'稳健':'中性'));
+  const r=fd?fd.reading:(li?li.r:(q.z>0?'今日上涨':'今日下跌'));
+  const gc=s>=75?'var(--r4)':(s>=60?'var(--a6)':'var(--t2)');
+  const gb=s>=75?'var(--r50)':(s>=60?'var(--a50)':'var(--bg)');
+  const q2=fd?fd.quote:q;
+
+  // Base info - just price
+  let html='<div style="padding:0 16px"><div class="profile-card"><div class="p-header"><div><div class="p-name">'+nm+' <span style="font-size:12px;font-weight:400;color:var(--t3)">'+(fd?fd.industry||'':'')+'</span></div><div class="p-code">'+c+(fd&&fd.industry?' - '+fd.industry:'')+'</div></div><div class="p-price"><div class="val" style="color:'+(up?'var(--r4)':'var(--g4)')+'">¥'+q.p.toFixed(2)+'</div><div class="chg" style="color:'+(up?'var(--r4)':'var(--g4)')+'">'+(up?'▲':'▼')+' '+Math.abs(q.z).toFixed(2)+'%</div></div></div></div>';
+
+  // 技术分析（核心标的：先看拆解）
+  if(fd&&fd.scores){
+    html+='<div style="margin:12px 16px 0;font-size:12px;font-weight:500;color:var(--t2)">技术分析</div><div class="dim-expand">';
+    const dc=[{k:'trend',l:'趋势动能',c:'#534AB7'},{k:'fund',l:'基本面',c:'#854F0B'},{k:'risk',l:'风险控制',c:'#D85A30'},{k:'momentum',l:'资金流向',c:'#639922'},{k:'vol',l:'量价配合',c:'#7F77DD'}];
+    dc.forEach(cfg=>{
+      const v=fd.scores[cfg.k];const f=fd.findings[cfg.k];
+      html+='<div class="d-card"><div class="d-head"><div class="d-name" style="color:'+cfg.c+'">'+cfg.l+'</div><div class="d-score" style="color:'+cfg.c+'">'+v+'分</div></div><div class="d-bar"><i style="width:'+v+'%;background:'+cfg.c+'"></i></div><div class="d-finding" style="margin-top:0">'+f+'</div></div>';
+    });
+    html+='</div></div>';
+  }
+
+  // 评分 + 解读（核心标的：再看总结；普通标的：直接看）
+  let readingDetail=r;
+  if(!fd&&q.pe){
+    const peInfo=q.pe<12?'PE偏低，估值较便宜':q.pe<25?'PE适中，估值合理':q.pe<40?'PE偏高':'PE较高，需关注估值风险';
+    const mInfo=q.m?', '+(q.m>50?'大盘蓝筹':q.m>10?'中盘股':'小盘股'):'';
+    readingDetail=readingDetail.replace('。','。 '+peInfo+mInfo+'。');
+  }
+  html+='<div class="score-box"><div class="score-num" style="color:'+gc+'">'+s+'</div><div class="score-grade" style="background:'+gb+';color:'+gc+'">AI评分 - '+g+'</div></div><div class="ai-read"><div class="text">'+readingDetail+'</div></div>';
+
+  html+='</div>';el.innerHTML=html;el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function renderHots(){
+  const names=catalog.filter(x=>HOT.includes(x.code));
+  document.getElementById('hotTags').innerHTML=names.map(s=>{
+    const q=quotes[s.code];
+    const col=q&&q.z>0?'var(--r4)':q&&q.z<0?'var(--g4)':'';
+    return '<span onclick="show(\''+s.code+'\')" style="'+(col?'border-color:'+col+';color:'+col:'')+'">'+s.name+'</span>';
+  }).join('');
+}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+function openModal(){document.getElementById('overlay').classList.add('show')}
+function closeModal(){document.getElementById('overlay').classList.remove('show')}
+function unlock(){closeModal();const qb=document.getElementById('qualBar');qb.classList.remove('locked');qb.querySelector('.qual-btn').textContent='已解锁';qb.querySelector('.qual-btn').style.background='var(--g4)';toast('已解锁');}
+</script>
+</body>
+</html>
