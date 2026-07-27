@@ -93,7 +93,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="toast" id="toast"></div>
 
 <script>
-let catalog=[],quotes={},full={},HOT=['600519','300750','002594','601318','300059','000858','000333','600036','600276','002415','002230','000063','603019','600900','601857','601899','002352','601127','601012'];
+let catalog=[],quotes={},full={},loaded=false,HOT=['600519','300750','002594','601318','300059','000858','000333','600036','600276','002415','002230','000063','603019','600900','601857','601899','002352','601127','601012'];
 
 function init(){
   Promise.all([
@@ -101,6 +101,7 @@ function init(){
     fetch('quotes_cache.json').then(r=>r.json()).then(d=>{quotes=d;}),
     fetch('data_cache.json').then(r=>r.json()).then(d=>{full=d;document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-27 收盘');})
   ]).then(()=>{
+    loaded=true;
     document.getElementById('stockInput').placeholder='输入股票名称或代码';
     setupAuto();
     renderHots();
@@ -144,7 +145,7 @@ function show(c){
   sgst([]);const el=document.getElementById('result');
   const q=quotes[c];const ct=catalog.find(x=>x.code===c);
   const fd=full&&full.stocks&&full.stocks[c]?full.stocks[c]:null;
-  if(!q||!fd){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">暂无数据</div>';return;}
+  if(!q||!fd){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">'+(loaded?'暂无数据':'数据加载中，请稍候...')+'</div>';return;}
   const nm=ct?ct.name:'';const up=q.z>0;
 
   // Base info - just price
