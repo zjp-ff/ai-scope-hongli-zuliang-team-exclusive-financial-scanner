@@ -146,9 +146,6 @@ function show(c){
   const fd=full&&full.stocks&&full.stocks[c]?full.stocks[c]:null;
   if(!q||!fd){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">暂无数据</div>';return;}
   const nm=ct?ct.name:'';const up=q.z>0;
-  const s=fd.totalScore;const g=fd.grade;const r=fd.reading;
-  const gc=s>=75?'var(--r4)':(s>=60?'var(--a6)':'var(--t2)');
-  const gb=s>=75?'var(--r50)':(s>=60?'var(--a50)':'var(--bg)');
 
   // Base info - just price
   let html='<div style="padding:0 16px"><div class="profile-card"><div class="p-header"><div><div class="p-name">'+nm+' <span style="font-size:12px;font-weight:400;color:var(--t3)">'+(fd.industry||'')+'</span></div><div class="p-code">'+c+(fd.industry?' - '+fd.industry:'')+'</div></div><div class="p-price"><div class="val" style="color:'+(up?'var(--r4)':'var(--g4)')+'">¥'+q.p.toFixed(2)+'</div><div class="chg" style="color:'+(up?'var(--r4)':'var(--g4)')+'">'+(up?'▲':'▼')+' '+Math.abs(q.z).toFixed(2)+'%</div></div></div></div>';
@@ -164,8 +161,6 @@ function show(c){
     html+='</div></div>';
   }
 
-  // 评分 + 解读
-  html+='<div class="score-box"><div class="score-num" style="color:'+gc+'">'+s+'</div><div class="score-grade" style="background:'+gb+';color:'+gc+'">AI评分 - '+g+'</div></div><div class="ai-read"><div class="text">'+r+'</div></div>';
   html+='</div>';el.innerHTML=html;el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
