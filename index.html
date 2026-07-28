@@ -96,15 +96,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 let catalog=[],quotes={},full={},loaded=false,HOT=['600519','300750','002594','601318','300059','000858','000333','600036','600276','002415','002230','000063','603019','600900','601857','601899','002352','601127','601012'];
 
 function init(){
+  // 先加载小文件，页面秒出
   Promise.all([
     fetch('stocks_catalog.json?_h='+Math.floor(Date.now()/36e5)).then(r=>r.json()).then(d=>{catalog=d;}),
     fetch('quotes_cache.json?_h='+Math.floor(Date.now()/36e5)).then(r=>r.json()).then(d=>{quotes=d;}),
-    fetch('data_cache.json?_h='+Math.floor(Date.now()/36e5)).then(r=>r.json()).then(d=>{full=d;document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-27 收盘');})
   ]).then(()=>{
-    loaded=true;
     document.getElementById('stockInput').placeholder='输入股票名称或代码';
     setupAuto();
     renderHots();
+    loaded=true;
+  });
+  // 后台加载大文件
+  fetch('data_cache.json?_h='+Math.floor(Date.now()/36e5)).then(r=>r.json()).then(d=>{
+    full=d;
+    document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-27 收盘');
   });
 }
 init();
