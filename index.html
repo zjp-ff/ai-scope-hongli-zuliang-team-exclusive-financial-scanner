@@ -179,5 +179,7 @@ function openModal(){document.getElementById('overlay').classList.add('show')}
 function closeModal(){document.getElementById('overlay').classList.remove('show')}
 function unlock(){closeModal();const qb=document.getElementById('qualBar');qb.classList.remove('locked');qb.querySelector('.qual-btn').textContent='已解锁';qb.querySelector('.qual-btn').style.background='var(--g4)';toast('已解锁');}
 </script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<span id="busuanzi_container" style="display:none">总访问 <span id="busuanzi_value_site_pv">0</span></span>
 </body>
 </html>
