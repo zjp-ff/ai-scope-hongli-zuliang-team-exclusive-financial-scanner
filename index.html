@@ -96,11 +96,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <script>
 let catalog=[],quotes={},full={},loaded=false,HOT=['600519','300750','002594','601318','300059','000858','000333','600036','600276','002415','002230','000063','603019','600900','601857','601899','002352','601127','601012'];
 
+
+function idbGet(k){return new Promise(function(res){try{if(!window.indexedDB){res(null);return;}var r=indexedDB.open('aiscope_cache',1);r.onupgradeneeded=function(e){try{e.target.result.createObjectStore('kv');}catch(_){}};r.onsuccess=function(e){var db=e.target.result;try{var tx=db.transaction('kv','readonly');var g=tx.objectStore('kv').get(k);g.onsuccess=function(){res(g.result||null);};g.onerror=function(){res(null);};}catch(_){res(null);}};r.onerror=function(){res(null);};}catch(_){res(null);}});}
+function idbSet(k,v){return new Promise(function(res){try{if(!window.indexedDB){res();return;}var r=indexedDB.open('aiscope_cache',1);r.onupgradeneeded=function(e){try{e.target.result.createObjectStore('kv');}catch(_){}};r.onsuccess=function(e){var db=e.target.result;try{var tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=function(){res();};tx.onerror=function(){res();};}catch(_){res();}};r.onerror=function(){res();};}catch(_){res();}});}
+function cachedJson(url){return idbGet(url).then(function(c){if(c!==null)return c;return fetch(url).then(function(r){return r.json();}).then(function(d){idbSet(url,d);return d;});});}
+
 function init(){
   // 先加载小文件，页面秒出
   Promise.all([
-    fetch('stocks_catalog.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(r=>r.json()).then(d=>{catalog=d;}),
-    fetch('quotes_cache.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(r=>r.json()).then(d=>{quotes=d;}),
+    cachedJson('stocks_catalog.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(d=>{catalog=d;}),
+    cachedJson('quotes_cache.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(d=>{quotes=d;}),
   ]).then(()=>{
     document.getElementById('stockInput').placeholder='输入股票名称或代码';
     setupAuto();
@@ -108,7 +113,7 @@ function init(){
     loaded=true;
   });
   // 后台加载大文件
-  fetch('data_cache.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(r=>r.json()).then(d=>{
+  cachedJson('data_cache.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(d=>{
     full=d;
     document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-27 收盘');
   });
