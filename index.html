@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>AI侦查镜</title>
 <style>
 :root{--a50:#FAEEDA;--a75:#FAC775;--a6:#854F0B;--a9:#412402;--p50:#EEEDFE;--p100:#CECBF6;--p6:#534AB7;--p8:#3C3489;--c50:#FAECE7;--c6:#D85A30;--r4:#E24B4A;--r50:#FCEBEB;--g4:#639922;--g50:#EAF3DE;--bg:#FAF9F6;--card:#FFFFFF;--bd:#E8E6E0;--t1:#2C2C2A;--t2:#6B6963;--t3:#9E9B94;}
@@ -101,21 +104,21 @@ function refreshData(){
   const dayKey=Math.floor((Date.now()-576e5)/864e5);
   // 先加载小文件，页面秒出
   Promise.all([
-    fetch('stocks_catalog.json?_d='+dayKey).then(r=>r.json()).then(d=>{catalog=d;}),
-    fetch('quotes_cache.json?_d='+dayKey).then(r=>r.json()).then(d=>{quotes=d;}),
+    fetch('stocks_catalog.json?_d='+dayKey+'&v='+PAGE_VER,{cache:'no-store'}).then(r=>r.json()).then(d=>{catalog=d;}),
+    fetch('quotes_cache.json?_d='+dayKey+'&v='+PAGE_VER,{cache:'no-store'}).then(r=>r.json()).then(d=>{quotes=d;}),
   ]).then(()=>{
     if(!loaded){document.getElementById('stockInput').placeholder='输入股票名称或代码';setupAuto();renderHots();loaded=true;}
     hideStaleTip();
   }).catch(()=>{showStaleTip();});
   // 后台加载大文件
-  fetch('data_cache.json?_d='+dayKey).then(r=>r.json()).then(d=>{
+  fetch('data_cache.json?_d='+dayKey+'&v='+PAGE_VER,{cache:'no-store'}).then(r=>r.json()).then(d=>{
     full=d;
     document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-27 收盘');
     hideStaleTip();
     if(currentCode)show(currentCode,true);
   }).catch(()=>{showStaleTip();});
 }
-const PAGE_VER='20260804-2';
+const PAGE_VER='20260804-3';
 function checkSelfUpdate(){fetch('version.txt?_d='+Date.now()).then(r=>r.text()).then(t=>{t=t.trim();if(t&&t!==PAGE_VER){location.reload(true);}}).catch(()=>{});}
 function init(){refreshData();checkSelfUpdate();setInterval(function(){refreshData();checkSelfUpdate();},5*60*1000);}
 init();
