@@ -63,7 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div id="loadMask">
   <div class="lm-spin"></div>
   <div class="lm-t1">数据加载中…</div>
-  <div class="lm-t2" id="lmTip">首次打开需下载全量数据，请保持网络畅通</div>
+  <div class="lm-t2" id="lmTip">每天首次打开需下载全量数据，请保持网络畅通</div>
 </div>
 <div class="banner" style="text-align:center">
   <div style="margin-bottom:6px;text-align:left">
@@ -141,7 +141,7 @@ function refreshData(){
     if(currentCode)show(currentCode,true);
   }).catch(()=>{loadFail();});
 }
-const PAGE_VER='20260804-6';
+const PAGE_VER='20260804-7';
 function checkSelfUpdate(){fetch('version.txt?_d='+Date.now()).then(r=>r.text()).then(t=>{t=t.trim();if(t&&t!==PAGE_VER){location.reload(true);}}).catch(()=>{});}
 function init(){refreshData();checkSelfUpdate();setInterval(function(){refreshData();checkSelfUpdate();},5*60*1000);}
 init();
