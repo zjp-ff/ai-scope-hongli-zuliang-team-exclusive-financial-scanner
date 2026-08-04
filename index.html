@@ -73,7 +73,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
   <div class="hot-tags" id="hotTags"></div>
 </div>
 <div id="result"></div>
-<div id="activity-banner" style="max-width:980px;margin:24px auto;padding:0 16px 24px;"><img src="activity.jpg" alt="良粉专享·续航行动" loading="lazy" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 16px rgba(0,0,0,.18);"></div>
 <div style="margin:16px 12px 8px;padding:12px 14px;background:var(--a50);border-radius:12px;border:0.5px solid var(--a75);line-height:1.7;text-align:center">
   <span style="font-size:13px;color:var(--a6)">📞 如遇问题请第一时间联系祖良老师助教：</span><br>
   <span style="font-size:15px;font-weight:600;color:var(--a9)">朱纪平、康增亮、张卫轩</span>
@@ -92,32 +91,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div id="staleTip" onclick="location.reload()" style="display:none;position:fixed;top:0;left:0;right:0;background:#FAC775;color:#412402;font-size:12px;text-align:center;padding:7px 10px;z-index:400;cursor:pointer">⚠ 数据可能不是最新，点击刷新</div>
 
 <script>
-let catalog=[],quotes={},full={},loaded=false,HOT=['600519','300750','002594','601318','300059','000858','000333','600036','600276','002415','002230','000063','603019','600900','601857','601899','002352','601127','601012'];
+let catalog=[],quotes={},full={},loaded=false,currentCode=null,HOT=['600519','300750','002594','601318','300059','000858','000333','600036','600276','002415','002230','000063','603019','600900','601857','601899','002352','601127','601012'];
 
-
-function idbGet(k){return new Promise(function(res){try{if(!window.indexedDB){res(null);return;}var r=indexedDB.open('aiscope_cache',1);r.onupgradeneeded=function(e){try{e.target.result.createObjectStore('kv');}catch(_){}};r.onsuccess=function(e){var db=e.target.result;try{var tx=db.transaction('kv','readonly');var g=tx.objectStore('kv').get(k);g.onsuccess=function(){res(g.result||null);};g.onerror=function(){res(null);};}catch(_){res(null);}};r.onerror=function(){res(null);};}catch(_){res(null);}});}
-function idbSet(k,v){return new Promise(function(res){try{if(!window.indexedDB){res();return;}var r=indexedDB.open('aiscope_cache',1);r.onupgradeneeded=function(e){try{e.target.result.createObjectStore('kv');}catch(_){}};r.onsuccess=function(e){var db=e.target.result;try{var tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=function(){res();};tx.onerror=function(){res();};}catch(_){res();}};r.onerror=function(){res();};}catch(_){res();}});}
-function cachedJson(url){return idbGet(url).then(function(c){if(c!==null)return c;return fetch(url).then(function(r){return r.json();}).then(function(d){idbSet(url,d);return d;});});}
-
-function init(){
+function refreshData(){
+  const dayKey=Math.floor((Date.now()-576e5)/864e5);
   // 先加载小文件，页面秒出
   Promise.all([
-    cachedJson('stocks_catalog.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(d=>{catalog=d;}),
-    cachedJson('quotes_cache.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(d=>{quotes=d;}),
+    fetch('stocks_catalog.json?_d='+dayKey).then(r=>r.json()).then(d=>{catalog=d;}),
+    fetch('quotes_cache.json?_d='+dayKey).then(r=>r.json()).then(d=>{quotes=d;}),
   ]).then(()=>{
-    document.getElementById('stockInput').placeholder='输入股票名称或代码';
-    setupAuto();
-    renderHots();
-    loaded=true;
-  });
+    if(!loaded){document.getElementById('stockInput').placeholder='输入股票名称或代码';setupAuto();renderHots();loaded=true;}
+    hideStaleTip();
+  }).catch(()=>{showStaleTip();});
   // 后台加载大文件
-  cachedJson('data_cache.json?_d='+Math.floor((Date.now()-576e5)/864e5)).then(d=>{
+  fetch('data_cache.json?_d='+dayKey).then(r=>r.json()).then(d=>{
     full=d;
     document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-27 收盘');
-  });
+    hideStaleTip();
+    if(currentCode)show(currentCode,true);
+  }).catch(()=>{showStaleTip();});
 }
+function init(){refreshData();setInterval(refreshData,5*60*1000);}
 init();
 
 function setupAuto(){
@@ -152,8 +149,8 @@ function doDiag(){
   document.getElementById('stockInput').value=r.name;sgst([]);show(r.code);
 }
 
-function show(c){
-  sgst([]);const el=document.getElementById('result');
+function show(c, silent){
+  if(!silent)sgst([]);currentCode=c;const el=document.getElementById('result');
   const q=quotes[c];const ct=catalog.find(x=>x.code===c);
   const fd=full&&full.stocks&&full.stocks[c]?full.stocks[c]:null;
   if(!q||!fd){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">'+(!full?'技术分析加载中... 数据量较大请稍候':'暂无数据')+'</div>';return;}
@@ -173,7 +170,7 @@ function show(c){
     html+='</div></div>';
   }
 
-  html+='</div>';el.innerHTML=html;el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  html+='</div>';el.innerHTML=html;if(!silent)el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 function renderHots(){
@@ -186,13 +183,13 @@ function renderHots(){
 }
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+function showStaleTip(){var t=document.getElementById('staleTip');if(t)t.style.display='block';}
+function hideStaleTip(){var t=document.getElementById('staleTip');if(t)t.style.display='none';}
 function openModal(){document.getElementById('overlay').classList.add('show')}
 function closeModal(){document.getElementById('overlay').classList.remove('show')}
 function unlock(){closeModal();const qb=document.getElementById('qualBar');qb.classList.remove('locked');qb.querySelector('.qual-btn').textContent='已解锁';qb.querySelector('.qual-btn').style.background='var(--g4)';toast('已解锁');}
 </script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <span id="busuanzi_container" style="display:none">总访问 <span id="busuanzi_value_site_pv">0</span></span>
-<script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
-<script>LA.init({id:"3Qhp0IgwbUm6EHzf",ck:"3Qhp0IgwbUm6EHzf"})</script>
 </body>
 </html>
