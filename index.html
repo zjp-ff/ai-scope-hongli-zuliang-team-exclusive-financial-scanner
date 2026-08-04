@@ -51,9 +51,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:300;display:none}.toast.show{display:block}
 .act-card{margin:16px 12px;padding:14px;background:var(--c50);border-radius:14px;text-align:center}
 .act-card h4{font-size:14px;font-weight:600;color:var(--c6)}
+#loadMask{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.lm-spin{width:46px;height:46px;border:4px solid var(--bd);border-top-color:var(--p6);border-radius:50%;animation:lmSpin .9s linear infinite}
+@keyframes lmSpin{to{transform:rotate(360deg)}}
+.lm-t1{font-size:17px;font-weight:600;color:var(--t1)}
+.lm-t2{font-size:12px;color:var(--t2);text-align:center;max-width:260px;line-height:1.6}
+#loadMask.err{cursor:pointer}
 </style>
 </head>
 <body>
+<div id="loadMask">
+  <div class="lm-spin"></div>
+  <div class="lm-t1">数据加载中…</div>
+  <div class="lm-t2" id="lmTip">首次打开需下载全量数据，请保持网络畅通</div>
+</div>
 <div class="banner" style="text-align:center">
   <div style="margin-bottom:6px;text-align:left">
     <span class="badge" style="background:var(--a75);color:var(--a9);font-size:12px;padding:3px 12px;border-radius:14px;font-weight:500">&#9733; 祖良团队专属</span>
@@ -103,6 +114,10 @@ let catalog=[],quotes={},full={},loaded=false,currentCode=null,HOT=['600519','30
 function dataDay(){const n=new Date();const bj=new Date(n.getTime()+8*3600*1000);if(bj.getUTCHours()>=16)return bj.toISOString().slice(0,10);bj.setUTCDate(bj.getUTCDate()-1);return bj.toISOString().slice(0,10);}
 function isFresh(d){if(!d||!d.generatedAt)return true;return d.generatedAt.indexOf(dataDay())>=0;}
 
+function hideLoadMask(){var m=document.getElementById('loadMask');if(m)m.style.display='none';}
+function loadFail(){var m=document.getElementById('loadMask');var t=document.getElementById('lmTip');if(m){m.classList.add('err');m.onclick=function(){location.reload();};}if(t)t.textContent='加载较慢或失败，点击页面任意处重试';}
+setTimeout(function(){var m=document.getElementById('loadMask');if(m&&m.style.display!=='none'&&!m.classList.contains('err'))loadFail();},90000);
+
 function refreshData(){
   const dayKey=Math.floor((Date.now()-288e5)/864e5); // 缓存键在16:00翻面，确保盘后更新被拉取
   // 先加载小文件，页面秒出
@@ -118,11 +133,11 @@ function refreshData(){
     full=d;
     if(!isFresh(d)){showStaleTip();setTimeout(refreshData,2000);return;}
     document.getElementById('updateTime').textContent='数据更新于 '+(d.generatedAt||'2026-07-27 收盘');
-    hideStaleTip();
+    hideStaleTip();hideLoadMask();
     if(currentCode)show(currentCode,true);
-  }).catch(()=>{showStaleTip();});
+  }).catch(()=>{loadFail();});
 }
-const PAGE_VER='20260804-4';
+const PAGE_VER='20260804-5';
 function checkSelfUpdate(){fetch('version.txt?_d='+Date.now()).then(r=>r.text()).then(t=>{t=t.trim();if(t&&t!==PAGE_VER){location.reload(true);}}).catch(()=>{});}
 function init(){refreshData();checkSelfUpdate();setInterval(function(){refreshData();checkSelfUpdate();},5*60*1000);}
 init();
